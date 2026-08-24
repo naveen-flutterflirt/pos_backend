@@ -1,0 +1,93 @@
+import { PrismaService } from '../prisma/prisma.service';
+export declare class InvoiceService {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    getInvoices(): Promise<{
+        id: number;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        invoiceNo: string;
+        customerName: string;
+        customerPhone: string | null;
+        productName: string;
+        quantity: string;
+        discount: string;
+        cgst: string;
+        sgst: string;
+        paymentType: string;
+        receivedAmount: string;
+    }[]>;
+    createInvoice(data: {
+        invoiceNo: string;
+        customerName: string;
+        customerPhone?: string;
+        productName: string;
+        quantity: string;
+        discount: string;
+        cgst: string;
+        sgst: string;
+        paymentType: string;
+        receivedAmount: string;
+        status?: string;
+    }): Promise<{
+        id: number;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        invoiceNo: string;
+        customerName: string;
+        customerPhone: string | null;
+        productName: string;
+        quantity: string;
+        discount: string;
+        cgst: string;
+        sgst: string;
+        paymentType: string;
+        receivedAmount: string;
+    }>;
+    updateInvoice(id: number, data: {
+        invoiceNo?: string;
+        customerName?: string;
+        customerPhone?: string;
+        productName?: string;
+        quantity?: string;
+        discount?: string;
+        cgst?: string;
+        sgst?: string;
+        paymentType?: string;
+        receivedAmount?: string;
+        status?: string;
+    }): Promise<{
+        id: number;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        invoiceNo: string;
+        customerName: string;
+        customerPhone: string | null;
+        productName: string;
+        quantity: string;
+        discount: string;
+        cgst: string;
+        sgst: string;
+        paymentType: string;
+        receivedAmount: string;
+    }>;
+    deleteInvoice(id: number): Promise<{
+        id: number;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        invoiceNo: string;
+        customerName: string;
+        customerPhone: string | null;
+        productName: string;
+        quantity: string;
+        discount: string;
+        cgst: string;
+        sgst: string;
+        paymentType: string;
+        receivedAmount: string;
+    }>;
+}
