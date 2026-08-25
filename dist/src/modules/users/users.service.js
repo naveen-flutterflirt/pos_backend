@@ -39,13 +39,17 @@ let UsersService = class UsersService {
                 name: data.name,
                 mobileNumber: data.mobileNumber,
                 password: data.password,
+                role: data.role || 'CASHIER',
+                store: data.store || null,
             },
         });
         await this.redis.del('users:all').catch(() => { });
+        await this.redis.del('users:all:CASHIER').catch(() => { });
+        await this.redis.del('users:all:INVENTORY').catch(() => { });
         return user;
     }
-    async findAll() {
-        const cacheKey = 'users:all';
+    async findAll(role) {
+        const cacheKey = role ? `users:all:${role}` : 'users:all';
         try {
             const cached = await this.redis.get(cacheKey);
             if (cached) {
@@ -54,11 +58,27 @@ let UsersService = class UsersService {
         }
         catch {
         }
-        const users = await this.prisma.user.findMany();
+        const whereClause = role ? { role } : {};
+        const users = await this.prisma.user.findMany({ where: whereClause });
         this.redis
             .setex(cacheKey, CACHE_TTL, JSON.stringify(users))
             .catch(() => { });
         return users;
+    }
+    async update(id, data) {
+        const user = await this.prisma.user.update({
+            where: { id },
+            data: {
+                ...(data.posAccess !== undefined && { posAccess: data.posAccess }),
+                ...(data.name && { name: data.name }),
+                ...(data.mobileNumber && { mobileNumber: data.mobileNumber }),
+                ...(data.email && { email: data.email }),
+            },
+        });
+        await this.redis.del('users:all').catch(() => { });
+        await this.redis.del('users:all:CASHIER').catch(() => { });
+        await this.redis.del('users:all:INVENTORY').catch(() => { });
+        return user;
     }
 };
 exports.UsersService = UsersService;

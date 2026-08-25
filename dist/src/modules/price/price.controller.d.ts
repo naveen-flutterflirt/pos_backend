@@ -4,29 +4,29 @@ export declare class PriceController {
     constructor(priceService: PriceService);
     getPrices(): Promise<({
         product: {
-            id: number;
             code: string;
             name: string;
-            description: string | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            categoryId: number;
+            id: number;
+            description: string | null;
             uom: string;
             hsnCode: string | null;
+            categoryId: number;
             subcategoryId: number | null;
             fssaiNumber: string | null;
             imageUrl: string | null;
         };
     } & {
-        id: number;
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        id: number;
+        productId: number;
         basePrice: number;
         additionalCharges: number | null;
         tax: number | null;
-        productId: number;
     })[]>;
     createPrice(body: {
         productId: number;
@@ -35,14 +35,14 @@ export declare class PriceController {
         tax?: number;
         status?: string;
     }): Promise<{
-        id: number;
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        id: number;
+        productId: number;
         basePrice: number;
         additionalCharges: number | null;
         tax: number | null;
-        productId: number;
     }>;
     updatePrice(id: string, body: {
         productId?: number;
@@ -51,23 +51,23 @@ export declare class PriceController {
         tax?: number;
         status?: string;
     }): Promise<{
-        id: number;
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        id: number;
+        productId: number;
         basePrice: number;
         additionalCharges: number | null;
         tax: number | null;
-        productId: number;
     }>;
     deletePrice(id: string): Promise<{
-        id: number;
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        id: number;
+        productId: number;
         basePrice: number;
         additionalCharges: number | null;
         tax: number | null;
-        productId: number;
     }>;
 }

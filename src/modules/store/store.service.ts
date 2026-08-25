@@ -6,7 +6,12 @@ import { Store } from '@prisma/client';
 export class StoreService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: { name: string; code: string; address: string }): Promise<Store> {
+  async create(data: {
+    name: string;
+    code: string;
+    address: string;
+    state?: string;
+  }): Promise<Store> {
     return this.prisma.store.create({
       data,
     });
@@ -28,7 +33,10 @@ export class StoreService {
     return store;
   }
 
-  async update(id: number, data: { name?: string; code?: string; address?: string }): Promise<Store> {
+  async update(
+    id: number,
+    data: { name?: string; code?: string; address?: string; state?: string },
+  ): Promise<Store> {
     const store = await this.prisma.store.findUnique({ where: { id } });
     if (!store) {
       throw new NotFoundException(`Store with ID ${id} not found`);

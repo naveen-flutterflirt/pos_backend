@@ -6,18 +6,30 @@ export class InventoryService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getStockBalances(storeId: string) {
-    const balances = await this.prisma.sql('SELECT * FROM "StockBalance" WHERE "storeId" = $1', [storeId]);
+    const balances = await this.prisma.sql(
+      'SELECT * FROM "StockBalance" WHERE "storeId" = $1',
+      [storeId],
+    );
     for (const bal of balances) {
-      const skus = await this.prisma.sql('SELECT * FROM "Sku" WHERE "id" = $1 LIMIT 1', [bal.skuId]);
+      const skus = await this.prisma.sql(
+        'SELECT * FROM "Sku" WHERE "id" = $1 LIMIT 1',
+        [bal.skuId],
+      );
       bal.sku = skus[0] || null;
     }
     return balances;
   }
 
   async getStockLedger(storeId: string) {
-    const ledger = await this.prisma.sql('SELECT * FROM "StockLedger" WHERE "storeId" = $1 ORDER BY "occurredAt" DESC', [storeId]);
+    const ledger = await this.prisma.sql(
+      'SELECT * FROM "StockLedger" WHERE "storeId" = $1 ORDER BY "occurredAt" DESC',
+      [storeId],
+    );
     for (const entry of ledger) {
-      const skus = await this.prisma.sql('SELECT * FROM "Sku" WHERE "id" = $1 LIMIT 1', [entry.skuId]);
+      const skus = await this.prisma.sql(
+        'SELECT * FROM "Sku" WHERE "id" = $1 LIMIT 1',
+        [entry.skuId],
+      );
       entry.sku = skus[0] || null;
     }
     return ledger;
@@ -55,20 +67,38 @@ export class InventoryService {
 
     if (!balance) {
       if (data.direction === 'OUT') {
-        throw new BadRequestException('Cannot reduce stock. Current balance is 0.');
+        throw new BadRequestException(
+          'Cannot reduce stock. Current balance is 0.',
+        );
       }
-      const newId = globalThis.crypto ? globalThis.crypto.randomUUID() : require('crypto').randomUUID();
+      const newId = globalThis.crypto
+        ? globalThis.crypto.randomUUID()
+        : require('crypto').randomUUID();
       const insertRows = await client.sql(
         'INSERT INTO "StockBalance" ("id", "storeId", "skuId", "batchId", "onHandQty", "availableQty", "averageCost", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP) RETURNING *',
-        [newId, data.storeId, data.skuId, data.batchId || null, movementQty, movementQty, data.unitCost],
+        [
+          newId,
+          data.storeId,
+          data.skuId,
+          data.batchId || null,
+          movementQty,
+          movementQty,
+          data.unitCost,
+        ],
       );
       balance = insertRows[0];
     } else {
-      const newOnHand = balance.onHandQty + (data.direction === 'IN' ? movementQty : -movementQty);
-      const newAvailable = balance.availableQty + (data.direction === 'IN' ? movementQty : -movementQty);
+      const newOnHand =
+        balance.onHandQty +
+        (data.direction === 'IN' ? movementQty : -movementQty);
+      const newAvailable =
+        balance.availableQty +
+        (data.direction === 'IN' ? movementQty : -movementQty);
 
       if (newAvailable < 0) {
-        throw new BadRequestException(`Negative stock is not allowed. Available: ${balance.availableQty}, request: ${movementQty}`);
+        throw new BadRequestException(
+          `Negative stock is not allowed. Available: ${balance.availableQty}, request: ${movementQty}`,
+        );
       }
 
       const updateRows = await client.sql(
@@ -78,7 +108,9 @@ export class InventoryService {
       balance = updateRows[0];
     }
 
-    const ledgerId = globalThis.crypto ? globalThis.crypto.randomUUID() : require('crypto').randomUUID();
+    const ledgerId = globalThis.crypto
+      ? globalThis.crypto.randomUUID()
+      : require('crypto').randomUUID();
     const ledgerRows = await client.sql(
       'INSERT INTO "StockLedger" ("id", "organizationId", "storeId", "skuId", "batchId", "movementType", "quantity", "unitCost", "referenceType", "referenceId", "direction", "createdBy", "auditedBy", "approvedBy", "metadata", "shrinkageType") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING *',
       [
@@ -114,21 +146,44 @@ export class InventoryService {
     quantity: number;
     unitCost: number;
   }) {
-    const id = globalThis.crypto ? globalThis.crypto.randomUUID() : require('crypto').randomUUID();
-    const mfgDate = data.manufacturingDate ? new Date(data.manufacturingDate).toISOString() : null;
-    const expDate = data.expiryDate ? new Date(data.expiryDate).toISOString() : null;
+    const id = globalThis.crypto
+      ? globalThis.crypto.randomUUID()
+      : require('crypto').randomUUID();
+    const mfgDate = data.manufacturingDate
+      ? new Date(data.manufacturingDate).toISOString()
+      : null;
+    const expDate = data.expiryDate
+      ? new Date(data.expiryDate).toISOString()
+      : null;
 
     const rows = await this.prisma.sql(
       'INSERT INTO "Batch" ("id", "skuId", "batchNumber", "manufacturingDate", "expiryDate", "storeId", "vendorId", "quantity", "unitCost", "stockValue") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
-      [id, data.skuId, data.batchNumber, mfgDate, expDate, data.storeId, data.vendorId, data.quantity, data.unitCost, data.quantity * data.unitCost],
+      [
+        id,
+        data.skuId,
+        data.batchNumber,
+        mfgDate,
+        expDate,
+        data.storeId,
+        data.vendorId,
+        data.quantity,
+        data.unitCost,
+        data.quantity * data.unitCost,
+      ],
     );
     return rows[0];
   }
 
   async getBatches(storeId: string) {
-    const batches = await this.prisma.sql('SELECT * FROM "Batch" WHERE "storeId" = $1', [storeId]);
+    const batches = await this.prisma.sql(
+      'SELECT * FROM "Batch" WHERE "storeId" = $1',
+      [storeId],
+    );
     for (const b of batches) {
-      const skus = await this.prisma.sql('SELECT * FROM "Sku" WHERE "id" = $1 LIMIT 1', [b.skuId]);
+      const skus = await this.prisma.sql(
+        'SELECT * FROM "Sku" WHERE "id" = $1 LIMIT 1',
+        [b.skuId],
+      );
       b.sku = skus[0] || null;
     }
     return batches;

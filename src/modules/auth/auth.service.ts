@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -18,12 +22,17 @@ export class AuthService {
       throw new BadRequestException('Email already registered');
     }
 
-    const existingMobile = await this.usersService.findByMobile(dto.mobileNumber);
+    const existingMobile = await this.usersService.findByMobile(
+      dto.mobileNumber,
+    );
     if (existingMobile) {
       throw new BadRequestException('Mobile number already registered');
     }
 
-    const hashedPassword = await bcrypt.hash(dto.password || 'DefaultPassword123', 10);
+    const hashedPassword = await bcrypt.hash(
+      dto.password || 'DefaultPassword123',
+      10,
+    );
 
     const user = await this.usersService.create({
       name: dto.name,
@@ -50,7 +59,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isMatch = await bcrypt.compare(dto.password || '', user.password || '');
+    const isMatch = await bcrypt.compare(
+      dto.password || '',
+      user.password || '',
+    );
     if (!isMatch) {
       throw new UnauthorizedException('Invalid credentials');
     }

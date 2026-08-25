@@ -24,7 +24,7 @@ exports.RedisModule = RedisModule = __decorate([
                     const client = new ioredis_1.Redis(redisUrl, {
                         retryStrategy: (times) => {
                             if (times > 3) {
-                                logger.warn('Could not connect to Redis, disabling caching.');
+                                logger.error('❌ Redis connection failed. Please ensure Redis is running.', 'RedisModule');
                                 return null;
                             }
                             return Math.min(times * 50, 2000);

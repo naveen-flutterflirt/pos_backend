@@ -7,14 +7,13 @@ export class CatalogService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
-  ) { }
+  ) {}
 
-  async createCategory(data: { code: string; name: string; description?: string }) {
+  async createCategory(data: { code: string; name: string }) {
     const category = await this.prisma.category.create({
       data: {
         code: data.code,
         name: data.name,
-        description: data.description,
       },
     });
     await this.redis.del('categories_list');
@@ -28,11 +27,16 @@ export class CatalogService {
     const categories = await this.prisma.category.findMany({
       include: { subcategories: true },
     });
-    await this.redis.set('categories_list', JSON.stringify(categories), 'EX', 60);
+    await this.redis.set(
+      'categories_list',
+      JSON.stringify(categories),
+      'EX',
+      60,
+    );
     return categories;
   }
 
-  async updateCategory(id: number, data: { code?: string; name?: string; description?: string }) {
+  async updateCategory(id: number, data: { code?: string; name?: string }) {
     const category = await this.prisma.category.update({
       where: { id },
       data,
@@ -42,6 +46,19 @@ export class CatalogService {
   }
 
   async deleteCategory(id: number) {
+    // Delete associated SKUs, Prices, and products
+    const products = await this.prisma.product.findMany({
+      where: { categoryId: id },
+    });
+    for (const p of products) {
+      await this.prisma.sku.deleteMany({ where: { productId: p.id } });
+      await this.prisma.price.deleteMany({ where: { productId: p.id } });
+    }
+    await this.prisma.product.deleteMany({ where: { categoryId: id } });
+
+    // Delete associated subcategories
+    await this.prisma.subCategory.deleteMany({ where: { categoryId: id } });
+
     const category = await this.prisma.category.delete({
       where: { id },
     });
@@ -49,13 +66,33 @@ export class CatalogService {
     return category;
   }
 
-  async createSubCategory(categoryId: number, data: { code: string; name: string }) {
+  async createSubCategory(
+    categoryId: number,
+    data: { code: string; name: string },
+  ) {
     const subCat = await this.prisma.subCategory.create({
       data: {
         categoryId,
         code: data.code,
         name: data.name,
       },
+    });
+    await this.redis.del('categories_list');
+    return subCat;
+  }
+
+  async updateSubCategory(id: number, data: { code?: string; name?: string }) {
+    const subCat = await this.prisma.subCategory.update({
+      where: { id },
+      data,
+    });
+    await this.redis.del('categories_list');
+    return subCat;
+  }
+
+  async deleteSubCategory(id: number) {
+    const subCat = await this.prisma.subCategory.delete({
+      where: { id },
     });
     await this.redis.del('categories_list');
     return subCat;
@@ -83,7 +120,6 @@ export class CatalogService {
         subcategoryId: data.subcategoryId,
         fssaiNumber: data.fssaiNumber,
         imageUrl: data.imageUrl,
-
       },
     });
     await this.redis.del('products_list');
@@ -101,13 +137,35 @@ export class CatalogService {
         skus: true,
       },
     });
+
+    // Case-insensitive sort
+    products.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+
     await this.redis.set('products_list', JSON.stringify(products), 'EX', 60);
     return products;
   }
 
+  async updateProduct(id: number, data: any) {
+    const product = await this.prisma.product.update({
+      where: { id },
+      data: {
+        code: data.code,
+        name: data.name,
+        description: data.description,
+        uom: data.uom,
+        hsnCode: data.hsnCode,
+      },
+    });
+    await this.redis.del('products_list');
+    return product;
+  }
+
   async deleteProduct(id: number) {
-    // Delete associated SKUs first to avoid foreign key constraint errors
+    // Delete associated SKUs and Prices first to avoid foreign key constraint errors
     await this.prisma.sku.deleteMany({
+      where: { productId: id },
+    });
+    await this.prisma.price.deleteMany({
       where: { productId: id },
     });
 
@@ -118,8 +176,10 @@ export class CatalogService {
     return product;
   }
 
-
-  async createSku(productId: number, data: { skuCode: string; barcode?: string; uom: string; weight?: number }) {
+  async createSku(
+    productId: number,
+    data: { skuCode: string; barcode?: string; uom: string; weight?: number },
+  ) {
     const sku = await this.prisma.sku.create({
       data: {
         productId,

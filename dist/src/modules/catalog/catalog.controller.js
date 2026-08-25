@@ -35,11 +35,20 @@ let CatalogController = class CatalogController {
     async createSubCategory(categoryId, body) {
         return this.catalogService.createSubCategory(Number(categoryId), body);
     }
+    async updateSubCategory(id, body) {
+        return this.catalogService.updateSubCategory(Number(id), body);
+    }
+    async deleteSubCategory(id) {
+        return this.catalogService.deleteSubCategory(Number(id));
+    }
     async createProduct(body) {
         return this.catalogService.createProduct(body);
     }
     async getProducts() {
         return this.catalogService.getProducts();
+    }
+    async updateProduct(id, body) {
+        return this.catalogService.updateProduct(Number(id), body);
     }
     async deleteProduct(id) {
         return this.catalogService.deleteProduct(Number(id));
@@ -89,6 +98,21 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CatalogController.prototype, "createSubCategory", null);
 __decorate([
+    (0, common_1.Put)('subcategories/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], CatalogController.prototype, "updateSubCategory", null);
+__decorate([
+    (0, common_1.Delete)('subcategories/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CatalogController.prototype, "deleteSubCategory", null);
+__decorate([
     (0, common_1.Post)('products'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -101,6 +125,14 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], CatalogController.prototype, "getProducts", null);
+__decorate([
+    (0, common_1.Put)('products/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], CatalogController.prototype, "updateProduct", null);
 __decorate([
     (0, common_1.Delete)('products/:id'),
     __param(0, (0, common_1.Param)('id')),

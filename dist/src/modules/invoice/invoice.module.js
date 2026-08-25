@@ -16,7 +16,7 @@ exports.InvoiceModule = InvoiceModule;
 exports.InvoiceModule = InvoiceModule = __decorate([
     (0, common_1.Module)({
         providers: [invoice_service_1.InvoiceService],
-        controllers: [invoice_controller_1.InvoiceController]
+        controllers: [invoice_controller_1.InvoiceController],
     })
 ], InvoiceModule);
 //# sourceMappingURL=invoice.module.js.map

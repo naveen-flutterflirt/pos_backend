@@ -23,12 +23,37 @@ let BillingService = class BillingService {
             throw new common_1.NotFoundException('Sales order not found');
         }
         const lines = await this.prisma.sql('SELECT * FROM "SalesOrderLine" WHERE "orderId" = $1', [orderId]);
-        const invoiceId = globalThis.crypto ? globalThis.crypto.randomUUID() : require('crypto').randomUUID();
+        const invoiceId = globalThis.crypto
+            ? globalThis.crypto.randomUUID()
+            : require('crypto').randomUUID();
         const dueDate = data.dueDate ? new Date(data.dueDate).toISOString() : null;
-        await this.prisma.sql('INSERT INTO "Invoice" ("id", "invoiceNumber", "orderId", "storeId", "status", "totalAmount", "taxAmount", "discountAmount", "netAmount", "dueDate") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [invoiceId, data.invoiceNumber, order.id, order.storeId, 'UNPAID', order.totalAmount, order.taxAmount, order.discountAmount, order.netAmount, dueDate]);
+        await this.prisma.sql('INSERT INTO "Invoice" ("id", "invoiceNumber", "orderId", "storeId", "status", "totalAmount", "taxAmount", "discountAmount", "netAmount", "dueDate") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [
+            invoiceId,
+            data.invoiceNumber,
+            order.id,
+            order.storeId,
+            'UNPAID',
+            order.totalAmount,
+            order.taxAmount,
+            order.discountAmount,
+            order.netAmount,
+            dueDate,
+        ]);
         for (const line of lines) {
-            const lineId = globalThis.crypto ? globalThis.crypto.randomUUID() : require('crypto').randomUUID();
-            await this.prisma.sql('INSERT INTO "InvoiceLine" ("id", "invoiceId", "skuId", "quantity", "unitPrice", "discountAmount", "taxRate", "taxAmount", "netAmount") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [lineId, invoiceId, line.skuId, line.quantity, line.unitPrice, line.discountAmount, line.taxRate, line.taxAmount, line.netAmount]);
+            const lineId = globalThis.crypto
+                ? globalThis.crypto.randomUUID()
+                : require('crypto').randomUUID();
+            await this.prisma.sql('INSERT INTO "InvoiceLine" ("id", "invoiceId", "skuId", "quantity", "unitPrice", "discountAmount", "taxRate", "taxAmount", "netAmount") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [
+                lineId,
+                invoiceId,
+                line.skuId,
+                line.quantity,
+                line.unitPrice,
+                line.discountAmount,
+                line.taxRate,
+                line.taxAmount,
+                line.netAmount,
+            ]);
         }
         const invoiceRows = await this.prisma.sql('SELECT * FROM "Invoice" WHERE "id" = $1 LIMIT 1', [invoiceId]);
         const invoice = invoiceRows[0];

@@ -22,9 +22,11 @@ const billing_module_1 = require("./modules/billing/billing.module");
 const payments_module_1 = require("./modules/payments/payments.module");
 const tax_module_1 = require("./modules/tax/tax.module");
 const redis_module_1 = require("./modules/redis/redis.module");
+const store_module_1 = require("./modules/store/store.module");
 const upload_module_1 = require("./modules/upload/upload.module");
 const price_module_1 = require("./modules/price/price.module");
 const invoice_module_1 = require("./modules/invoice/invoice.module");
+const marketing_module_1 = require("./modules/marketing/marketing.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -43,9 +45,11 @@ exports.AppModule = AppModule = __decorate([
             payments_module_1.PaymentsModule,
             tax_module_1.TaxModule,
             redis_module_1.RedisModule,
+            store_module_1.StoreModule,
             upload_module_1.UploadModule,
             price_module_1.PriceModule,
             invoice_module_1.InvoiceModule,
+            marketing_module_1.MarketingModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

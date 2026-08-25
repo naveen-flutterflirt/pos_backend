@@ -16,10 +16,13 @@ export interface TaxCalculationResult {
 
 @Injectable()
 export class TaxService {
-  async calculateTax(request: TaxCalculationRequest): Promise<TaxCalculationResult> {
+  async calculateTax(
+    request: TaxCalculationRequest,
+  ): Promise<TaxCalculationResult> {
     if (request.country.toUpperCase() === 'IN') {
       // Default India GST strategy
-      const isInterState = request.state && request.state.toUpperCase() !== 'KA'; // assuming base state is KA
+      const isInterState =
+        request.state && request.state.toUpperCase() !== 'KA'; // assuming base state is KA
       const rate = 18; // 18% standard rate
       const taxAmount = request.taxableAmount * (rate / 100);
 

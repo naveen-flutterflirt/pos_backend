@@ -28,8 +28,17 @@ let PaymentsService = class PaymentsService {
         if (data.amount > remainingAmount) {
             throw new common_1.BadRequestException(`Payment amount exceeds outstanding balance. Outstanding: ${remainingAmount}`);
         }
-        const id = globalThis.crypto ? globalThis.crypto.randomUUID() : require('crypto').randomUUID();
-        const insertRows = await this.prisma.sql('INSERT INTO "Payment" ("id", "invoiceId", "method", "amount", "transactionId", "status") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [id, invoice.id, data.method, data.amount, data.transactionId || null, 'SUCCESS']);
+        const id = globalThis.crypto
+            ? globalThis.crypto.randomUUID()
+            : require('crypto').randomUUID();
+        const insertRows = await this.prisma.sql('INSERT INTO "Payment" ("id", "invoiceId", "method", "amount", "transactionId", "status") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [
+            id,
+            invoice.id,
+            data.method,
+            data.amount,
+            data.transactionId || null,
+            'SUCCESS',
+        ]);
         const payment = insertRows[0];
         const newTotalPaid = totalPaid + data.amount;
         let newStatus = 'PARTIAL';
@@ -40,7 +49,9 @@ let PaymentsService = class PaymentsService {
         return payment;
     }
     async getPayments(invoiceId) {
-        return this.prisma.sql('SELECT * FROM "Payment" WHERE "invoiceId" = $1', [invoiceId]);
+        return this.prisma.sql('SELECT * FROM "Payment" WHERE "invoiceId" = $1', [
+            invoiceId,
+        ]);
     }
 };
 exports.PaymentsService = PaymentsService;

@@ -31,17 +31,21 @@ export class UsersService {
         name: data.name,
         mobileNumber: data.mobileNumber,
         password: data.password,
+        role: data.role || 'CASHIER',
+        store: data.store || null,
       },
     });
 
     // Invalidate users list cache on create
     await this.redis.del('users:all').catch(() => {});
+    await this.redis.del('users:all:CASHIER').catch(() => {});
+    await this.redis.del('users:all:INVENTORY').catch(() => {});
 
     return user;
   }
 
-  async findAll(): Promise<User[]> {
-    const cacheKey = 'users:all';
+  async findAll(role?: string): Promise<User[]> {
+    const cacheKey = role ? `users:all:${role}` : 'users:all';
 
     try {
       const cached = await this.redis.get(cacheKey);
@@ -52,7 +56,8 @@ export class UsersService {
       // Redis unavailable — fall through to DB
     }
 
-    const users = await this.prisma.user.findMany();
+    const whereClause = role ? { role } : {};
+    const users = await this.prisma.user.findMany({ where: whereClause });
 
     // Cache result (fire-and-forget, don't block response)
     this.redis
@@ -60,5 +65,24 @@ export class UsersService {
       .catch(() => {});
 
     return users;
+  }
+
+  async update(id: string, data: any): Promise<User> {
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: {
+        ...(data.posAccess !== undefined && { posAccess: data.posAccess }),
+        ...(data.name && { name: data.name }),
+        ...(data.mobileNumber && { mobileNumber: data.mobileNumber }),
+        ...(data.email && { email: data.email }),
+      },
+    });
+
+    // Invalidate users list cache on update
+    await this.redis.del('users:all').catch(() => {});
+    await this.redis.del('users:all:CASHIER').catch(() => {});
+    await this.redis.del('users:all:INVENTORY').catch(() => {});
+
+    return user;
   }
 }

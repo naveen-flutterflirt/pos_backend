@@ -7,6 +7,7 @@ export declare class StoreService {
         name: string;
         code: string;
         address: string;
+        state?: string;
     }): Promise<Store>;
     findAll(): Promise<Store[]>;
     findOne(id: number): Promise<Store>;
@@ -14,6 +15,7 @@ export declare class StoreService {
         name?: string;
         code?: string;
         address?: string;
+        state?: string;
     }): Promise<Store>;
     remove(id: number): Promise<Store>;
 }

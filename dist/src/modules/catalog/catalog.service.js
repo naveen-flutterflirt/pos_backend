@@ -26,7 +26,6 @@ let CatalogService = class CatalogService {
             data: {
                 code: data.code,
                 name: data.name,
-                description: data.description,
             },
         });
         await this.redis.del('categories_list');
@@ -51,6 +50,15 @@ let CatalogService = class CatalogService {
         return category;
     }
     async deleteCategory(id) {
+        const products = await this.prisma.product.findMany({
+            where: { categoryId: id },
+        });
+        for (const p of products) {
+            await this.prisma.sku.deleteMany({ where: { productId: p.id } });
+            await this.prisma.price.deleteMany({ where: { productId: p.id } });
+        }
+        await this.prisma.product.deleteMany({ where: { categoryId: id } });
+        await this.prisma.subCategory.deleteMany({ where: { categoryId: id } });
         const category = await this.prisma.category.delete({
             where: { id },
         });
@@ -64,6 +72,21 @@ let CatalogService = class CatalogService {
                 code: data.code,
                 name: data.name,
             },
+        });
+        await this.redis.del('categories_list');
+        return subCat;
+    }
+    async updateSubCategory(id, data) {
+        const subCat = await this.prisma.subCategory.update({
+            where: { id },
+            data,
+        });
+        await this.redis.del('categories_list');
+        return subCat;
+    }
+    async deleteSubCategory(id) {
+        const subCat = await this.prisma.subCategory.delete({
+            where: { id },
         });
         await this.redis.del('categories_list');
         return subCat;
@@ -96,11 +119,29 @@ let CatalogService = class CatalogService {
                 skus: true,
             },
         });
+        products.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
         await this.redis.set('products_list', JSON.stringify(products), 'EX', 60);
         return products;
     }
+    async updateProduct(id, data) {
+        const product = await this.prisma.product.update({
+            where: { id },
+            data: {
+                code: data.code,
+                name: data.name,
+                description: data.description,
+                uom: data.uom,
+                hsnCode: data.hsnCode,
+            },
+        });
+        await this.redis.del('products_list');
+        return product;
+    }
     async deleteProduct(id) {
         await this.prisma.sku.deleteMany({
+            where: { productId: id },
+        });
+        await this.prisma.price.deleteMany({
             where: { productId: id },
         });
         const product = await this.prisma.product.delete({

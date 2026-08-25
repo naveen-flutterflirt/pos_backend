@@ -17,6 +17,7 @@ import { StoreModule } from './modules/store/store.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { PriceModule } from './modules/price/price.module';
 import { InvoiceModule } from './modules/invoice/invoice.module';
+import { MarketingModule } from './modules/marketing/marketing.module';
 
 @Module({
   imports: [
@@ -32,9 +33,11 @@ import { InvoiceModule } from './modules/invoice/invoice.module';
     PaymentsModule,
     TaxModule,
     RedisModule,
+    StoreModule,
     UploadModule,
     PriceModule,
     InvoiceModule,
+    MarketingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

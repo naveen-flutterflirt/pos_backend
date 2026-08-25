@@ -19,19 +19,58 @@ let ProcurementService = class ProcurementService {
         this.inventoryService = inventoryService;
     }
     async createGrn(data) {
-        const grnId = globalThis.crypto ? globalThis.crypto.randomUUID() : require('crypto').randomUUID();
-        await this.prisma.sql('INSERT INTO "GoodsReceiptNote" ("id", "grnNumber", "purchaseOrderId", "vendorId", "storeId", "description", "status") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *', [grnId, data.grnNumber, data.purchaseOrderId || null, data.vendorId, data.storeId, data.description || null, 'COMPLETED']);
+        const grnId = globalThis.crypto
+            ? globalThis.crypto.randomUUID()
+            : require('crypto').randomUUID();
+        await this.prisma.sql('INSERT INTO "GoodsReceiptNote" ("id", "grnNumber", "purchaseOrderId", "vendorId", "storeId", "description", "status") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *', [
+            grnId,
+            data.grnNumber,
+            data.purchaseOrderId || null,
+            data.vendorId,
+            data.storeId,
+            data.description || null,
+            'COMPLETED',
+        ]);
         for (const line of data.lines) {
             let batchId = null;
             if (line.batchNumber) {
-                const bid = globalThis.crypto ? globalThis.crypto.randomUUID() : require('crypto').randomUUID();
-                const mfg = line.manufacturingDate ? new Date(line.manufacturingDate).toISOString() : null;
-                const exp = line.expiryDate ? new Date(line.expiryDate).toISOString() : null;
-                const batchRows = await this.prisma.sql('INSERT INTO "Batch" ("id", "skuId", "batchNumber", "manufacturingDate", "expiryDate", "storeId", "vendorId", "quantity", "unitCost", "stockValue") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *', [bid, line.skuId, line.batchNumber, mfg, exp, data.storeId, data.vendorId, line.receivedQty, line.unitCost, line.receivedQty * line.unitCost]);
+                const bid = globalThis.crypto
+                    ? globalThis.crypto.randomUUID()
+                    : require('crypto').randomUUID();
+                const mfg = line.manufacturingDate
+                    ? new Date(line.manufacturingDate).toISOString()
+                    : null;
+                const exp = line.expiryDate
+                    ? new Date(line.expiryDate).toISOString()
+                    : null;
+                const batchRows = await this.prisma.sql('INSERT INTO "Batch" ("id", "skuId", "batchNumber", "manufacturingDate", "expiryDate", "storeId", "vendorId", "quantity", "unitCost", "stockValue") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *', [
+                    bid,
+                    line.skuId,
+                    line.batchNumber,
+                    mfg,
+                    exp,
+                    data.storeId,
+                    data.vendorId,
+                    line.receivedQty,
+                    line.unitCost,
+                    line.receivedQty * line.unitCost,
+                ]);
                 batchId = bid;
             }
-            const lid = globalThis.crypto ? globalThis.crypto.randomUUID() : require('crypto').randomUUID();
-            await this.prisma.sql('INSERT INTO "GoodsReceiptLine" ("id", "grnId", "skuId", "batchId", "orderedQty", "receivedQty", "rejectedQty", "unitCost", "taxAmount") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [lid, grnId, line.skuId, batchId, line.orderedQty, line.receivedQty, line.rejectedQty || 0, line.unitCost, line.taxAmount || 0]);
+            const lid = globalThis.crypto
+                ? globalThis.crypto.randomUUID()
+                : require('crypto').randomUUID();
+            await this.prisma.sql('INSERT INTO "GoodsReceiptLine" ("id", "grnId", "skuId", "batchId", "orderedQty", "receivedQty", "rejectedQty", "unitCost", "taxAmount") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [
+                lid,
+                grnId,
+                line.skuId,
+                batchId,
+                line.orderedQty,
+                line.receivedQty,
+                line.rejectedQty || 0,
+                line.unitCost,
+                line.taxAmount || 0,
+            ]);
             await this.inventoryService.adjustStock('SYSTEM', 'ORG_DEFAULT', {
                 storeId: data.storeId,
                 skuId: line.skuId,

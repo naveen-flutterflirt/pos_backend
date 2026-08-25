@@ -7,43 +7,62 @@ export declare class CatalogService {
     createCategory(data: {
         code: string;
         name: string;
-        description?: string;
     }): Promise<{
         code: string;
         name: string;
-        description: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         id: number;
+        description: string | null;
     }>;
     getCategories(): Promise<any>;
     updateCategory(id: number, data: {
         code?: string;
         name?: string;
-        description?: string;
     }): Promise<{
         code: string;
         name: string;
-        description: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         id: number;
+        description: string | null;
     }>;
     deleteCategory(id: number): Promise<{
         code: string;
         name: string;
-        description: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         id: number;
+        description: string | null;
     }>;
     createSubCategory(categoryId: number, data: {
         code: string;
         name: string;
     }): Promise<{
+        code: string;
+        name: string;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        id: number;
+        categoryId: number;
+    }>;
+    updateSubCategory(id: number, data: {
+        code?: string;
+        name?: string;
+    }): Promise<{
+        code: string;
+        name: string;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        id: number;
+        categoryId: number;
+    }>;
+    deleteSubCategory(id: number): Promise<{
         code: string;
         name: string;
         status: string;
@@ -65,33 +84,48 @@ export declare class CatalogService {
     }): Promise<{
         code: string;
         name: string;
-        description: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         id: number;
-        categoryId: number;
+        description: string | null;
         uom: string;
         hsnCode: string | null;
+        categoryId: number;
+        subcategoryId: number | null;
         fssaiNumber: string | null;
         imageUrl: string | null;
-        subcategoryId: number | null;
     }>;
     getProducts(): Promise<any>;
+    updateProduct(id: number, data: any): Promise<{
+        code: string;
+        name: string;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        id: number;
+        description: string | null;
+        uom: string;
+        hsnCode: string | null;
+        categoryId: number;
+        subcategoryId: number | null;
+        fssaiNumber: string | null;
+        imageUrl: string | null;
+    }>;
     deleteProduct(id: number): Promise<{
         code: string;
         name: string;
-        description: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         id: number;
-        categoryId: number;
+        description: string | null;
         uom: string;
         hsnCode: string | null;
+        categoryId: number;
+        subcategoryId: number | null;
         fssaiNumber: string | null;
         imageUrl: string | null;
-        subcategoryId: number | null;
     }>;
     createSku(productId: number, data: {
         skuCode: string;
@@ -103,11 +137,11 @@ export declare class CatalogService {
         createdAt: Date;
         updatedAt: Date;
         id: number;
+        productId: number;
         uom: string;
         skuCode: string;
         barcode: string | null;
         weight: number | null;
-        productId: number;
     }>;
     getSkuByCode(skuCode: string): Promise<any>;
 }

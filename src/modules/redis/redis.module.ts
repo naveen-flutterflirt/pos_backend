@@ -9,11 +9,11 @@ import { Redis } from 'ioredis';
       useFactory: () => {
         const logger = new Logger('RedisModule');
         const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-        
+
         const client = new Redis(redisUrl, {
           retryStrategy: (times) => {
             if (times > 3) {
-              logger.warn('Could not connect to Redis, disabling caching.');
+              logger.error('❌ Redis connection failed. Please ensure Redis is running.', 'RedisModule');
               return null; // Stop retrying
             }
             return Math.min(times * 50, 2000);

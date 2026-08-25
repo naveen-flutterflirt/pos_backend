@@ -16,7 +16,7 @@ exports.PriceModule = PriceModule;
 exports.PriceModule = PriceModule = __decorate([
     (0, common_1.Module)({
         providers: [price_service_1.PriceService],
-        controllers: [price_controller_1.PriceController]
+        controllers: [price_controller_1.PriceController],
     })
 ], PriceModule);
 //# sourceMappingURL=price.module.js.map

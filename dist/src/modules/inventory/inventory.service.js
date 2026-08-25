@@ -41,20 +41,34 @@ let InventoryService = class InventoryService {
             if (data.direction === 'OUT') {
                 throw new common_1.BadRequestException('Cannot reduce stock. Current balance is 0.');
             }
-            const newId = globalThis.crypto ? globalThis.crypto.randomUUID() : require('crypto').randomUUID();
-            const insertRows = await client.sql('INSERT INTO "StockBalance" ("id", "storeId", "skuId", "batchId", "onHandQty", "availableQty", "averageCost", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP) RETURNING *', [newId, data.storeId, data.skuId, data.batchId || null, movementQty, movementQty, data.unitCost]);
+            const newId = globalThis.crypto
+                ? globalThis.crypto.randomUUID()
+                : require('crypto').randomUUID();
+            const insertRows = await client.sql('INSERT INTO "StockBalance" ("id", "storeId", "skuId", "batchId", "onHandQty", "availableQty", "averageCost", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP) RETURNING *', [
+                newId,
+                data.storeId,
+                data.skuId,
+                data.batchId || null,
+                movementQty,
+                movementQty,
+                data.unitCost,
+            ]);
             balance = insertRows[0];
         }
         else {
-            const newOnHand = balance.onHandQty + (data.direction === 'IN' ? movementQty : -movementQty);
-            const newAvailable = balance.availableQty + (data.direction === 'IN' ? movementQty : -movementQty);
+            const newOnHand = balance.onHandQty +
+                (data.direction === 'IN' ? movementQty : -movementQty);
+            const newAvailable = balance.availableQty +
+                (data.direction === 'IN' ? movementQty : -movementQty);
             if (newAvailable < 0) {
                 throw new common_1.BadRequestException(`Negative stock is not allowed. Available: ${balance.availableQty}, request: ${movementQty}`);
             }
             const updateRows = await client.sql('UPDATE "StockBalance" SET "onHandQty" = $1, "availableQty" = $2, "version" = "version" + 1, "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = $3 RETURNING *', [newOnHand, newAvailable, balance.id]);
             balance = updateRows[0];
         }
-        const ledgerId = globalThis.crypto ? globalThis.crypto.randomUUID() : require('crypto').randomUUID();
+        const ledgerId = globalThis.crypto
+            ? globalThis.crypto.randomUUID()
+            : require('crypto').randomUUID();
         const ledgerRows = await client.sql('INSERT INTO "StockLedger" ("id", "organizationId", "storeId", "skuId", "batchId", "movementType", "quantity", "unitCost", "referenceType", "referenceId", "direction", "createdBy", "auditedBy", "approvedBy", "metadata", "shrinkageType") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING *', [
             ledgerId,
             organizationId,
@@ -76,10 +90,27 @@ let InventoryService = class InventoryService {
         return { balance, ledger: ledgerRows[0] };
     }
     async createBatch(data) {
-        const id = globalThis.crypto ? globalThis.crypto.randomUUID() : require('crypto').randomUUID();
-        const mfgDate = data.manufacturingDate ? new Date(data.manufacturingDate).toISOString() : null;
-        const expDate = data.expiryDate ? new Date(data.expiryDate).toISOString() : null;
-        const rows = await this.prisma.sql('INSERT INTO "Batch" ("id", "skuId", "batchNumber", "manufacturingDate", "expiryDate", "storeId", "vendorId", "quantity", "unitCost", "stockValue") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *', [id, data.skuId, data.batchNumber, mfgDate, expDate, data.storeId, data.vendorId, data.quantity, data.unitCost, data.quantity * data.unitCost]);
+        const id = globalThis.crypto
+            ? globalThis.crypto.randomUUID()
+            : require('crypto').randomUUID();
+        const mfgDate = data.manufacturingDate
+            ? new Date(data.manufacturingDate).toISOString()
+            : null;
+        const expDate = data.expiryDate
+            ? new Date(data.expiryDate).toISOString()
+            : null;
+        const rows = await this.prisma.sql('INSERT INTO "Batch" ("id", "skuId", "batchNumber", "manufacturingDate", "expiryDate", "storeId", "vendorId", "quantity", "unitCost", "stockValue") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *', [
+            id,
+            data.skuId,
+            data.batchNumber,
+            mfgDate,
+            expDate,
+            data.storeId,
+            data.vendorId,
+            data.quantity,
+            data.unitCost,
+            data.quantity * data.unitCost,
+        ]);
         return rows[0];
     }
     async getBatches(storeId) {

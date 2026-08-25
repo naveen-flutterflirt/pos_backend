@@ -6,7 +6,10 @@ export class BillingController {
   constructor(private readonly billingService: BillingService) {}
 
   @Post('orders/:orderId/invoices')
-  async createInvoice(@Param('orderId') orderId: string, @Body() body: { invoiceNumber: string; dueDate?: Date }) {
+  async createInvoice(
+    @Param('orderId') orderId: string,
+    @Body() body: { invoiceNumber: string; dueDate?: Date },
+  ) {
     return this.billingService.createInvoice(orderId, body);
   }
 

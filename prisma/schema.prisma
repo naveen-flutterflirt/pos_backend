@@ -84,6 +84,9 @@ model User {
   name         String
   mobileNumber String   @unique
   password     String?
+  role         String?
+  store        String?
+  posAccess    Boolean  @default(false)
   status       String   @default("Active")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -94,6 +97,7 @@ model Store {
   name      String
   code      String   @unique
   address   String
+  state     String?
   status    String   @default("Active")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -126,4 +130,32 @@ model Invoice {
   status         String   @default("Completed")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+model Coupon {
+  id             Int       @id @default(autoincrement())
+  code           String    @unique
+  name           String
+  discountType   String
+  discountValue  Float
+  minimumOrder   Float
+  startDate      DateTime
+  endDate        DateTime
+  status         String    @default("Active")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model GiftCard {
+  id                Int       @id @default(autoincrement())
+  code              String    @unique
+  name              String
+  value             Float
+  redemptionDetails String?
+  issuedTo          String?
+  startDate         DateTime
+  endDate           DateTime
+  status            String    @default("Active")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }
