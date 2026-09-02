@@ -49,6 +49,8 @@ export class AuthService {
         name: user.name,
         email: user.email,
         mobileNumber: user.mobileNumber,
+        role: user.role,
+        posAccess: user.posAccess,
       },
     };
   }
@@ -75,6 +77,8 @@ export class AuthService {
         name: user.name,
         email: user.email,
         mobileNumber: user.mobileNumber,
+        role: user.role,
+        posAccess: user.posAccess,
       },
     };
   }

@@ -16,6 +16,7 @@ exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const ioredis_1 = require("ioredis");
+const bcrypt = require("bcrypt");
 const CACHE_TTL = 60;
 let UsersService = class UsersService {
     constructor(prisma, redis) {
@@ -43,13 +44,11 @@ let UsersService = class UsersService {
                 store: data.store || null,
             },
         });
-        await this.redis.del('users:all').catch(() => { });
-        await this.redis.del('users:all:CASHIER').catch(() => { });
-        await this.redis.del('users:all:INVENTORY').catch(() => { });
+        await this.invalidateCache('users:all*').catch(() => { });
         return user;
     }
-    async findAll(role) {
-        const cacheKey = role ? `users:all:${role}` : 'users:all';
+    async findAll(role, page = 1, limit = 50) {
+        const cacheKey = role ? `users:all:${role}:page:${page}:limit:${limit}` : `users:all:page:${page}:limit:${limit}`;
         try {
             const cached = await this.redis.get(cacheKey);
             if (cached) {
@@ -59,26 +58,62 @@ let UsersService = class UsersService {
         catch {
         }
         const whereClause = role ? { role } : {};
-        const users = await this.prisma.user.findMany({ where: whereClause });
+        const skip = (page - 1) * limit;
+        const [users, total] = await Promise.all([
+            this.prisma.user.findMany({
+                where: whereClause,
+                skip,
+                take: limit,
+                orderBy: { createdAt: 'desc' }
+            }),
+            this.prisma.user.count({ where: whereClause })
+        ]);
+        const result = {
+            data: users,
+            meta: { total, page, limit, totalPages: Math.ceil(total / limit) }
+        };
         this.redis
-            .setex(cacheKey, CACHE_TTL, JSON.stringify(users))
+            .setex(cacheKey, CACHE_TTL, JSON.stringify(result))
             .catch(() => { });
-        return users;
+        return result;
     }
     async update(id, data) {
+        const updateData = {
+            ...(data.posAccess !== undefined && { posAccess: data.posAccess }),
+            ...(data.name && { name: data.name }),
+            ...(data.mobileNumber && { mobileNumber: data.mobileNumber }),
+            ...(data.email && { email: data.email }),
+        };
+        if (data.password && data.password.trim() !== '' && data.password !== '********') {
+            updateData.password = await bcrypt.hash(data.password, 10);
+        }
         const user = await this.prisma.user.update({
             where: { id },
-            data: {
-                ...(data.posAccess !== undefined && { posAccess: data.posAccess }),
-                ...(data.name && { name: data.name }),
-                ...(data.mobileNumber && { mobileNumber: data.mobileNumber }),
-                ...(data.email && { email: data.email }),
-            },
+            data: updateData,
         });
-        await this.redis.del('users:all').catch(() => { });
-        await this.redis.del('users:all:CASHIER').catch(() => { });
-        await this.redis.del('users:all:INVENTORY').catch(() => { });
+        await this.invalidateCache('users:all*').catch(() => { });
         return user;
+    }
+    async delete(id) {
+        try {
+            const user = await this.prisma.user.delete({
+                where: { id },
+            });
+            await this.invalidateCache('users:all*').catch(() => { });
+            return user;
+        }
+        catch (error) {
+            if (error.code === 'P2025') {
+                throw new common_1.NotFoundException('User not found');
+            }
+            throw error;
+        }
+    }
+    async invalidateCache(pattern) {
+        const keys = await this.redis.keys(pattern);
+        if (keys.length > 0) {
+            await this.redis.del(...keys);
+        }
     }
 };
 exports.UsersService = UsersService;

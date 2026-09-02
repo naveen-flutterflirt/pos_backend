@@ -8,32 +8,32 @@ export declare class StoreController {
         address: string;
         state?: string;
     }): Promise<{
+        id: number;
         code: string;
         name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
         address: string;
         state: string | null;
     }>;
     findAll(): Promise<{
+        id: number;
         code: string;
         name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
         address: string;
         state: string | null;
     }[]>;
     findOne(id: number): Promise<{
+        id: number;
         code: string;
         name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
         address: string;
         state: string | null;
     }>;
@@ -43,22 +43,22 @@ export declare class StoreController {
         address?: string;
         state?: string;
     }): Promise<{
+        id: number;
         code: string;
         name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
         address: string;
         state: string | null;
     }>;
     remove(id: number): Promise<{
+        id: number;
         code: string;
         name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
         address: string;
         state: string | null;
     }>;

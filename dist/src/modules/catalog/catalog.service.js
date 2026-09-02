@@ -28,25 +28,36 @@ let CatalogService = class CatalogService {
                 name: data.name,
             },
         });
-        await this.redis.del('categories_list');
+        await this.invalidateCache('categories_list:*');
         return category;
     }
-    async getCategories() {
-        const cached = await this.redis.get('categories_list');
+    async getCategories(page = 1, limit = 50) {
+        const cacheKey = `categories_list:page:${page}:limit:${limit}`;
+        const cached = await this.redis.get(cacheKey);
         if (cached)
             return JSON.parse(cached);
-        const categories = await this.prisma.category.findMany({
-            include: { subcategories: true },
-        });
-        await this.redis.set('categories_list', JSON.stringify(categories), 'EX', 60);
-        return categories;
+        const skip = (page - 1) * limit;
+        const [categories, total] = await this.prisma.$transaction([
+            this.prisma.category.findMany({
+                skip,
+                take: limit,
+                include: { subcategories: true },
+            }),
+            this.prisma.category.count()
+        ]);
+        const result = {
+            data: categories,
+            meta: { total, page, limit, totalPages: Math.ceil(total / limit) }
+        };
+        await this.redis.set(cacheKey, JSON.stringify(result), 'EX', 60);
+        return result;
     }
     async updateCategory(id, data) {
         const category = await this.prisma.category.update({
             where: { id },
             data,
         });
-        await this.redis.del('categories_list');
+        await this.invalidateCache('categories_list:*');
         return category;
     }
     async deleteCategory(id) {
@@ -62,7 +73,7 @@ let CatalogService = class CatalogService {
         const category = await this.prisma.category.delete({
             where: { id },
         });
-        await this.redis.del('categories_list');
+        await this.invalidateCache('categories_list:*');
         return category;
     }
     async createSubCategory(categoryId, data) {
@@ -73,7 +84,7 @@ let CatalogService = class CatalogService {
                 name: data.name,
             },
         });
-        await this.redis.del('categories_list');
+        await this.invalidateCache('categories_list:*');
         return subCat;
     }
     async updateSubCategory(id, data) {
@@ -81,14 +92,14 @@ let CatalogService = class CatalogService {
             where: { id },
             data,
         });
-        await this.redis.del('categories_list');
+        await this.invalidateCache('categories_list:*');
         return subCat;
     }
     async deleteSubCategory(id) {
         const subCat = await this.prisma.subCategory.delete({
             where: { id },
         });
-        await this.redis.del('categories_list');
+        await this.invalidateCache('categories_list:*');
         return subCat;
     }
     async createProduct(data) {
@@ -105,23 +116,36 @@ let CatalogService = class CatalogService {
                 imageUrl: data.imageUrl,
             },
         });
-        await this.redis.del('products_list');
+        await this.invalidateCache('products_list:*');
         return product;
     }
-    async getProducts() {
-        const cached = await this.redis.get('products_list');
+    async getProducts(page = 1, limit = 50) {
+        const cacheKey = `products_list:page:${page}:limit:${limit}`;
+        const cached = await this.redis.get(cacheKey);
         if (cached)
             return JSON.parse(cached);
-        const products = await this.prisma.product.findMany({
-            include: {
-                category: true,
-                subcategory: true,
-                skus: true,
-            },
-        });
-        products.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
-        await this.redis.set('products_list', JSON.stringify(products), 'EX', 60);
-        return products;
+        const skip = (page - 1) * limit;
+        const [products, total] = await this.prisma.$transaction([
+            this.prisma.product.findMany({
+                skip,
+                take: limit,
+                include: {
+                    category: true,
+                    subcategory: true,
+                    skus: true,
+                },
+                orderBy: {
+                    name: 'asc'
+                }
+            }),
+            this.prisma.product.count()
+        ]);
+        const result = {
+            data: products,
+            meta: { total, page, limit, totalPages: Math.ceil(total / limit) }
+        };
+        await this.redis.set(cacheKey, JSON.stringify(result), 'EX', 60);
+        return result;
     }
     async updateProduct(id, data) {
         const product = await this.prisma.product.update({
@@ -134,7 +158,7 @@ let CatalogService = class CatalogService {
                 hsnCode: data.hsnCode,
             },
         });
-        await this.redis.del('products_list');
+        await this.invalidateCache('products_list:*');
         return product;
     }
     async deleteProduct(id) {
@@ -147,7 +171,7 @@ let CatalogService = class CatalogService {
         const product = await this.prisma.product.delete({
             where: { id },
         });
-        await this.redis.del('products_list');
+        await this.invalidateCache('products_list:*');
         return product;
     }
     async createSku(productId, data) {
@@ -160,7 +184,7 @@ let CatalogService = class CatalogService {
                 weight: data.weight,
             },
         });
-        await this.redis.del('products_list');
+        await this.invalidateCache('products_list:*');
         await this.redis.del(`sku_${data.skuCode}`);
         return sku;
     }
@@ -176,6 +200,12 @@ let CatalogService = class CatalogService {
             await this.redis.set(`sku_${skuCode}`, JSON.stringify(sku), 'EX', 300);
         }
         return sku;
+    }
+    async invalidateCache(pattern) {
+        const keys = await this.redis.keys(pattern);
+        if (keys.length > 0) {
+            await this.redis.del(...keys);
+        }
     }
 };
 exports.CatalogService = CatalogService;

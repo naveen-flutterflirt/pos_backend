@@ -23,8 +23,10 @@ let CatalogController = class CatalogController {
     async createCategory(body) {
         return this.catalogService.createCategory(body);
     }
-    async getCategories() {
-        return this.catalogService.getCategories();
+    async getCategories(page, limit) {
+        const pageNumber = page ? Math.max(1, parseInt(page, 10)) : 1;
+        const limitNumber = limit ? Math.max(1, parseInt(limit, 10)) : 50;
+        return this.catalogService.getCategories(pageNumber, limitNumber);
     }
     async updateCategory(id, body) {
         return this.catalogService.updateCategory(Number(id), body);
@@ -44,8 +46,10 @@ let CatalogController = class CatalogController {
     async createProduct(body) {
         return this.catalogService.createProduct(body);
     }
-    async getProducts() {
-        return this.catalogService.getProducts();
+    async getProducts(page, limit) {
+        const pageNumber = page ? Math.max(1, parseInt(page, 10)) : 1;
+        const limitNumber = limit ? Math.max(1, parseInt(limit, 10)) : 50;
+        return this.catalogService.getProducts(pageNumber, limitNumber);
     }
     async updateProduct(id, body) {
         return this.catalogService.updateProduct(Number(id), body);
@@ -70,8 +74,10 @@ __decorate([
 ], CatalogController.prototype, "createCategory", null);
 __decorate([
     (0, common_1.Get)('categories'),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], CatalogController.prototype, "getCategories", null);
 __decorate([
@@ -121,8 +127,10 @@ __decorate([
 ], CatalogController.prototype, "createProduct", null);
 __decorate([
     (0, common_1.Get)('products'),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], CatalogController.prototype, "getProducts", null);
 __decorate([

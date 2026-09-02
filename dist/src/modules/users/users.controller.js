@@ -19,19 +19,26 @@ let UsersController = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
     }
-    async getAllUsers(role) {
-        return this.usersService.findAll(role);
+    async getAllUsers(role, page, limit) {
+        const pageNumber = page ? Math.max(1, parseInt(page, 10)) : 1;
+        const limitNumber = limit ? Math.max(1, parseInt(limit, 10)) : 50;
+        return this.usersService.findAll(role, pageNumber, limitNumber);
     }
     async updateUser(id, data) {
         return this.usersService.update(id, data);
+    }
+    async deleteUser(id) {
+        return this.usersService.delete(id);
     }
 };
 exports.UsersController = UsersController;
 __decorate([
     (0, common_1.Get)(),
     __param(0, (0, common_1.Query)('role')),
+    __param(1, (0, common_1.Query)('page')),
+    __param(2, (0, common_1.Query)('limit')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getAllUsers", null);
 __decorate([
@@ -42,6 +49,13 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateUser", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "deleteUser", null);
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [users_service_1.UsersService])

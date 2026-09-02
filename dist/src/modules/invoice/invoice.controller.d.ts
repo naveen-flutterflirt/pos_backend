@@ -3,10 +3,10 @@ export declare class InvoiceController {
     private readonly invoiceService;
     constructor(invoiceService: InvoiceService);
     getInvoices(): Promise<{
+        id: number;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
         invoiceNo: string;
         customerName: string;
         customerPhone: string | null;
@@ -31,10 +31,10 @@ export declare class InvoiceController {
         receivedAmount: string;
         status?: string;
     }): Promise<{
+        id: number;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
         invoiceNo: string;
         customerName: string;
         customerPhone: string | null;
@@ -59,10 +59,10 @@ export declare class InvoiceController {
         receivedAmount?: string;
         status?: string;
     }): Promise<{
+        id: number;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
         invoiceNo: string;
         customerName: string;
         customerPhone: string | null;
@@ -75,10 +75,10 @@ export declare class InvoiceController {
         receivedAmount: string;
     }>;
     deleteInvoice(id: string): Promise<{
+        id: number;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
         invoiceNo: string;
         customerName: string;
         customerPhone: string | null;

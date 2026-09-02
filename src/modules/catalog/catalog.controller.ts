@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { CognitoAuthGuard } from '../auth/cognito.guard';
 import { CatalogService } from './catalog.service';
@@ -22,8 +23,10 @@ export class CatalogController {
   }
 
   @Get('categories')
-  async getCategories() {
-    return this.catalogService.getCategories();
+  async getCategories(@Query('page') page?: string, @Query('limit') limit?: string) {
+    const pageNumber = page ? Math.max(1, parseInt(page, 10)) : 1;
+    const limitNumber = limit ? Math.max(1, parseInt(limit, 10)) : 50;
+    return this.catalogService.getCategories(pageNumber, limitNumber);
   }
 
   @Put('categories/:id')
@@ -79,8 +82,10 @@ export class CatalogController {
   }
 
   @Get('products')
-  async getProducts() {
-    return this.catalogService.getProducts();
+  async getProducts(@Query('page') page?: string, @Query('limit') limit?: string) {
+    const pageNumber = page ? Math.max(1, parseInt(page, 10)) : 1;
+    const limitNumber = limit ? Math.max(1, parseInt(limit, 10)) : 50;
+    return this.catalogService.getProducts(pageNumber, limitNumber);
   }
 
   @Put('products/:id')

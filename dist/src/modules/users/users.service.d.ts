@@ -8,6 +8,8 @@ export declare class UsersService {
     findByEmail(email: string): Promise<User | null>;
     findByMobile(mobileNumber: string): Promise<User | null>;
     create(data: any): Promise<User>;
-    findAll(role?: string): Promise<User[]>;
+    findAll(role?: string, page?: number, limit?: number): Promise<any>;
     update(id: string, data: any): Promise<User>;
+    delete(id: string): Promise<User>;
+    private invalidateCache;
 }

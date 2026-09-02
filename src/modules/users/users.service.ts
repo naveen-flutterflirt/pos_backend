@@ -1,7 +1,8 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User } from '@prisma/client';
 import { Redis } from 'ioredis';
+import * as bcrypt from 'bcrypt';
 
 const CACHE_TTL = 60; // seconds
 
@@ -10,7 +11,7 @@ export class UsersService {
   constructor(
     private prisma: PrismaService,
     @Inject('REDIS_CLIENT') private redis: Redis,
-  ) {}
+  ) { }
 
   async findByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({
@@ -37,52 +38,94 @@ export class UsersService {
     });
 
     // Invalidate users list cache on create
-    await this.redis.del('users:all').catch(() => {});
-    await this.redis.del('users:all:CASHIER').catch(() => {});
-    await this.redis.del('users:all:INVENTORY').catch(() => {});
+    await this.invalidateCache('users:all*').catch(() => { });
 
     return user;
   }
 
-  async findAll(role?: string): Promise<User[]> {
-    const cacheKey = role ? `users:all:${role}` : 'users:all';
+  async findAll(role?: string, page: number = 1, limit: number = 50): Promise<any> {
+    const cacheKey = role ? `users:all:${role}:page:${page}:limit:${limit}` : `users:all:page:${page}:limit:${limit}`;
 
     try {
       const cached = await this.redis.get(cacheKey);
       if (cached) {
-        return JSON.parse(cached) as User[];
+        return JSON.parse(cached);
       }
     } catch {
       // Redis unavailable — fall through to DB
     }
 
     const whereClause = role ? { role } : {};
-    const users = await this.prisma.user.findMany({ where: whereClause });
+    const skip = (page - 1) * limit;
+
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' }
+      }),
+      this.prisma.user.count({ where: whereClause })
+    ]);
+
+    const result = {
+      data: users,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) }
+    };
 
     // Cache result (fire-and-forget, don't block response)
     this.redis
-      .setex(cacheKey, CACHE_TTL, JSON.stringify(users))
-      .catch(() => {});
+      .setex(cacheKey, CACHE_TTL, JSON.stringify(result))
+      .catch(() => { });
 
-    return users;
+    return result;
   }
 
   async update(id: string, data: any): Promise<User> {
+    const updateData: any = {
+      ...(data.posAccess !== undefined && { posAccess: data.posAccess }),
+      ...(data.name && { name: data.name }),
+      ...(data.mobileNumber && { mobileNumber: data.mobileNumber }),
+      ...(data.email && { email: data.email }),
+    };
+
+    if (data.password && data.password.trim() !== '' && data.password !== '********') {
+      updateData.password = await bcrypt.hash(data.password, 10);
+    }
+
     const user = await this.prisma.user.update({
       where: { id },
-      data: {
-        ...(data.posAccess !== undefined && { posAccess: data.posAccess }),
-        ...(data.name && { name: data.name }),
-        ...(data.mobileNumber && { mobileNumber: data.mobileNumber }),
-        ...(data.email && { email: data.email }),
-      },
+      data: updateData,
     });
 
     // Invalidate users list cache on update
-    await this.redis.del('users:all').catch(() => {});
-    await this.redis.del('users:all:CASHIER').catch(() => {});
-    await this.redis.del('users:all:INVENTORY').catch(() => {});
+    await this.invalidateCache('users:all*').catch(() => { });
 
     return user;
+  }
+
+  async delete(id: string): Promise<User> {
+    try {
+      const user = await this.prisma.user.delete({
+        where: { id },
+      });
+
+      // Invalidate users list cache on delete
+      await this.invalidateCache('users:all*').catch(() => { });
+
+      return user;
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException('User not found');
+      }
+      throw error;
+    }
+  }
+
+  private async invalidateCache(pattern: string) {
+    const keys = await this.redis.keys(pattern);
+    if (keys.length > 0) {
+      await this.redis.del(...keys);
+    }
   }
 }

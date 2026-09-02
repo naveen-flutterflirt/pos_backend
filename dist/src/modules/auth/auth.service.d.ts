@@ -13,6 +13,8 @@ export declare class AuthService {
             name: string;
             email: string;
             mobileNumber: string;
+            role: string | null;
+            posAccess: boolean;
         };
     }>;
     login(dto: LoginDto): Promise<{
@@ -22,6 +24,8 @@ export declare class AuthService {
             name: string;
             email: string;
             mobileNumber: string;
+            role: string | null;
+            posAccess: boolean;
         };
     }>;
 }

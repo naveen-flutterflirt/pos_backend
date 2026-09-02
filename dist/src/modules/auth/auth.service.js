@@ -43,6 +43,8 @@ let AuthService = class AuthService {
                 name: user.name,
                 email: user.email,
                 mobileNumber: user.mobileNumber,
+                role: user.role,
+                posAccess: user.posAccess,
             },
         };
     }
@@ -63,6 +65,8 @@ let AuthService = class AuthService {
                 name: user.name,
                 email: user.email,
                 mobileNumber: user.mobileNumber,
+                role: user.role,
+                posAccess: user.posAccess,
             },
         };
     }

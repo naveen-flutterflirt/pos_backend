@@ -6,67 +6,67 @@ export declare class CatalogController {
         code: string;
         name: string;
     }): Promise<{
+        id: number;
         code: string;
         name: string;
+        description: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
-        description: string | null;
     }>;
-    getCategories(): Promise<any>;
+    getCategories(page?: string, limit?: string): Promise<any>;
     updateCategory(id: string, body: {
         code?: string;
         name?: string;
     }): Promise<{
+        id: number;
         code: string;
         name: string;
+        description: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
-        description: string | null;
     }>;
     deleteCategory(id: string): Promise<{
+        id: number;
         code: string;
         name: string;
+        description: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
-        description: string | null;
     }>;
     createSubCategory(categoryId: string, body: {
         code: string;
         name: string;
     }): Promise<{
+        id: number;
         code: string;
         name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
         categoryId: number;
     }>;
     updateSubCategory(id: string, body: {
         code?: string;
         name?: string;
     }): Promise<{
+        id: number;
         code: string;
         name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
         categoryId: number;
     }>;
     deleteSubCategory(id: string): Promise<{
+        id: number;
         code: string;
         name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
         categoryId: number;
     }>;
     createProduct(body: {
@@ -80,47 +80,47 @@ export declare class CatalogController {
         fssaiNumber?: string;
         imageUrl?: string;
     }): Promise<{
+        id: number;
         code: string;
         name: string;
+        description: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
-        description: string | null;
+        categoryId: number;
         uom: string;
         hsnCode: string | null;
-        categoryId: number;
         subcategoryId: number | null;
         fssaiNumber: string | null;
         imageUrl: string | null;
     }>;
-    getProducts(): Promise<any>;
+    getProducts(page?: string, limit?: string): Promise<any>;
     updateProduct(id: string, body: any): Promise<{
+        id: number;
         code: string;
         name: string;
+        description: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
-        description: string | null;
+        categoryId: number;
         uom: string;
         hsnCode: string | null;
-        categoryId: number;
         subcategoryId: number | null;
         fssaiNumber: string | null;
         imageUrl: string | null;
     }>;
     deleteProduct(id: string): Promise<{
+        id: number;
         code: string;
         name: string;
+        description: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
-        description: string | null;
+        categoryId: number;
         uom: string;
         hsnCode: string | null;
-        categoryId: number;
         subcategoryId: number | null;
         fssaiNumber: string | null;
         imageUrl: string | null;
@@ -131,12 +131,12 @@ export declare class CatalogController {
         uom: string;
         weight?: number;
     }): Promise<{
+        id: number;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
-        productId: number;
         uom: string;
+        productId: number;
         skuCode: string;
         barcode: string | null;
         weight: number | null;

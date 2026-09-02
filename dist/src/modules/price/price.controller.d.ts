@@ -4,25 +4,25 @@ export declare class PriceController {
     constructor(priceService: PriceService);
     getPrices(): Promise<({
         product: {
+            id: number;
             code: string;
             name: string;
+            description: string | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            id: number;
-            description: string | null;
+            categoryId: number;
             uom: string;
             hsnCode: string | null;
-            categoryId: number;
             subcategoryId: number | null;
             fssaiNumber: string | null;
             imageUrl: string | null;
         };
     } & {
+        id: number;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
         productId: number;
         basePrice: number;
         additionalCharges: number | null;
@@ -35,10 +35,10 @@ export declare class PriceController {
         tax?: number;
         status?: string;
     }): Promise<{
+        id: number;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
         productId: number;
         basePrice: number;
         additionalCharges: number | null;
@@ -51,20 +51,20 @@ export declare class PriceController {
         tax?: number;
         status?: string;
     }): Promise<{
+        id: number;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
         productId: number;
         basePrice: number;
         additionalCharges: number | null;
         tax: number | null;
     }>;
     deletePrice(id: string): Promise<{
+        id: number;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        id: number;
         productId: number;
         basePrice: number;
         additionalCharges: number | null;
