@@ -1,0 +1,93 @@
+import { InvoiceService } from './invoice.service';
+export declare class InvoiceController {
+    private readonly invoiceService;
+    constructor(invoiceService: InvoiceService);
+    getInvoices(): Promise<{
+        id: number;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        invoiceNo: string;
+        customerName: string;
+        customerPhone: string | null;
+        productName: string;
+        quantity: string;
+        discount: string;
+        cgst: string;
+        sgst: string;
+        paymentType: string;
+        receivedAmount: string;
+    }[]>;
+    createInvoice(body: {
+        invoiceNo: string;
+        customerName: string;
+        customerPhone?: string;
+        productName: string;
+        quantity: string;
+        discount: string;
+        cgst: string;
+        sgst: string;
+        paymentType: string;
+        receivedAmount: string;
+        status?: string;
+    }): Promise<{
+        id: number;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        invoiceNo: string;
+        customerName: string;
+        customerPhone: string | null;
+        productName: string;
+        quantity: string;
+        discount: string;
+        cgst: string;
+        sgst: string;
+        paymentType: string;
+        receivedAmount: string;
+    }>;
+    updateInvoice(id: string, body: {
+        invoiceNo?: string;
+        customerName?: string;
+        customerPhone?: string;
+        productName?: string;
+        quantity?: string;
+        discount?: string;
+        cgst?: string;
+        sgst?: string;
+        paymentType?: string;
+        receivedAmount?: string;
+        status?: string;
+    }): Promise<{
+        id: number;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        invoiceNo: string;
+        customerName: string;
+        customerPhone: string | null;
+        productName: string;
+        quantity: string;
+        discount: string;
+        cgst: string;
+        sgst: string;
+        paymentType: string;
+        receivedAmount: string;
+    }>;
+    deleteInvoice(id: string): Promise<{
+        id: number;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        invoiceNo: string;
+        customerName: string;
+        customerPhone: string | null;
+        productName: string;
+        quantity: string;
+        discount: string;
+        cgst: string;
+        sgst: string;
+        paymentType: string;
+        receivedAmount: string;
+    }>;
+}

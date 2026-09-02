@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Category {
+  id            Int           @id @default(autoincrement())
+  code          String        @unique
+  name          String
+  description   String?
+  status        String        @default("Active")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  subcategories SubCategory[]
+  products      Product[]
+}
+
+model SubCategory {
+  id         Int       @id @default(autoincrement())
+  categoryId Int
+  category   Category  @relation(fields: [categoryId], references: [id])
+  code       String    @unique
+  name       String
+  status     String    @default("Active")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  products   Product[]
+}
+
+model Product {
+  id            Int          @id @default(autoincrement())
+  code          String       @unique
+  name          String
+  description   String?
+  uom           String
+  hsnCode       String?
+  categoryId    Int
+  category      Category     @relation(fields: [categoryId], references: [id])
+  subcategoryId Int?
+  subcategory   SubCategory? @relation(fields: [subcategoryId], references: [id])
+  fssaiNumber   String?
+  imageUrl      String?
+  status        String       @default("Active")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  skus          Sku[]
+  prices        Price[]
+}
+
+model Sku {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  skuCode   String   @unique
+  barcode   String?
+  uom       String
+  weight    Float?
+  status    String   @default("Active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Vendor {
+  id          Int      @id @default(autoincrement())
+  vendorName  String
+  code        String   @unique
+  address     String?
+  gst         String?
+  vehicleNo   String?
+  esugamNo    String?
+  vendorType  String?
+  paymentType String?
+  status      String   @default("Active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  mobileNumber String   @unique
+  password     String?
+  role         String?
+  store        String?
+  posAccess    Boolean  @default(false)
+  status       String   @default("Active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Store {
+  id        Int      @id @default(autoincrement())
+  name      String
+  code      String   @unique
+  address   String
+  state     String?
+  status    String   @default("Active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Price {
+  id                Int      @id @default(autoincrement())
+  productId         Int
+  product           Product  @relation(fields: [productId], references: [id])
+  basePrice         Float
+  additionalCharges Float?
+  tax               Float?
+  status            String   @default("Active")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Invoice {
+  id             Int      @id @default(autoincrement())
+  invoiceNo      String   @unique
+  customerName   String
+  customerPhone  String?
+  productName    String
+  quantity       String
+  discount       String
+  cgst           String
+  sgst           String
+  paymentType    String
+  receivedAmount String
+  status         String   @default("Completed")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Coupon {
+  id             Int       @id @default(autoincrement())
+  code           String    @unique
+  name           String
+  discountType   String
+  discountValue  Float
+  minimumOrder   Float
+  startDate      DateTime
+  endDate        DateTime
+  status         String    @default("Active")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model GiftCard {
+  id                Int       @id @default(autoincrement())
+  code              String    @unique
+  name              String
+  value             Float
+  redemptionDetails String?
+  issuedTo          String?
+  startDate         DateTime
+  endDate           DateTime
+  status            String    @default("Active")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
